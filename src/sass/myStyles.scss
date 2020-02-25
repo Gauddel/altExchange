@@ -1,0 +1,74 @@
+@charset "utf-8";
+@import "../../node_modules/bulma/bulma.sass";
+
+.containerPerso {
+    margin-top : 2% !important;
+}
+
+button, .button {
+    min-width: 100% !important;
+    background-color: #1e88e5 !important;
+    color : white !important;
+    justify-content: center;
+}
+
+.buttonCustom {
+    min-width: 90% !important;
+    max-width: 90% !important;
+}
+
+.minimumMargin {
+    margin-top : 1% !important;
+    margin-bottom : 1% !important;
+    margin-left : 3% !important;
+    margin-right : 3% !important;
+}
+
+.dropdown {
+    justify-content: center;
+    min-width: 100% !important;
+    padding: 1% !important;
+    display: inherit;
+}
+
+.dropdownButton {
+    border: 2px solid #005cb2; // #1e88e5 // #bcbcbc gris
+}
+
+.dropdownMenu {
+    display: inherit;
+    justify-content: center;
+    min-width: 100% !important;
+    margin: 1% !important;
+    border: 2px solid #bcbcbc;
+}
+
+.dropdown-menu {
+    min-width: 100%;
+    padding-right: 5px !important;
+}
+
+input {
+    border : 1px solid #005cb2 !important;
+}
+
+.aCustom {
+    margin-bottom: 15% !important;
+    display: block !important;
+    margin-left: auto;
+    margin-right: auto;    
+}
+
+.pCustom {
+    text-align: center;
+    min-width: 100%;
+}
+
+.contCust {
+    margin-top : -13% !important;
+    margin-bottom : 10% !important;
+}
+
+.pCust {
+    margin-left : 3% !important;
+}
