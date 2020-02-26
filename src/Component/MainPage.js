@@ -522,6 +522,7 @@ class MainPage extends React.Component {
 
     render() {
         console.log(window.ethereum.selectedAddress);
+        console.log(ethereum.enable());
         if (window.ethereum.selectedAddress != null) {
         return (<div>
             <div className="navbar" >
