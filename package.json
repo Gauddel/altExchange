@@ -41,5 +41,5 @@
   "devDependencies": {
     "gh-pages": "^2.2.0"
   },
-  "homepage": "http://gauddel.github.io/-erc20-token-exchange"
+  "homepage": "https://erc20exchange.herokuapp.com/"
 }
