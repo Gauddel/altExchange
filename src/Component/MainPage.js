@@ -56,6 +56,7 @@ class MainPage extends React.Component {
             ethMkrSelected : false,
             ethOmgSelected : false,
             ethZrxSelected : false,
+            connected : false,
         };
 
         this.dropdownListClass = this.dropdownListClass.bind(this);
@@ -520,191 +521,85 @@ class MainPage extends React.Component {
         return 'Select Currency Pair';
     }
 
-    render() {
-        console.log(window.ethereum.selectedAddress);
-        return window.ethereum.enable().then((res) => {
-            console.log(res);
-            return (<div>
-                <div className="navbar" >
-                    <div className="navbar-brand">
-                        <a className="navbar-item image" href="https://uniswap.io/">
-                            <img src="https://image.flaticon.com/icons/png/32/1475/1475932.png" width="30" height="36"/>  
-                            <p className="has-text-weight-semibold pCust"> Uniswap</p>
+    Connecting() {
+        window.ethereum.enable().then(() => {
+            this.setState({
+                connected : true,
+            })
+        })
+    }
+
+    render() {        
+        if (this.state.connected) {
+        return (<div>
+            <div className="navbar" >
+                <div className="navbar-brand">
+                    <a className="navbar-item image" href="https://uniswap.io/">
+                        <img src="https://image.flaticon.com/icons/png/32/1475/1475932.png" width="30" height="36"/>  
+                        <p className="has-text-weight-semibold pCust"> Uniswap</p>
+                    </a>
+                </div>
+                <div className="navbar-end">
+                <div className={this.dropdownListClass()}>
+                    <div className="dropdown-trigger">
+                        <button className="button dropdownButton" aria-haspopup="true" aria-controls="dropdown-menu" onClick={() => this.dropdownListClicked()}>
+                        <span>{this.GetSelectionText()}</span>
+                        <span className="icon is-small">
+                            <i className="fas fa-angle-down" aria-hidden="true"></i>
+                        </span>
+                        </button>
+                    </div>
+                    <div className="dropdown-menu" id="dropdown-menu" role="menu">
+                        <div className="dropdown-content dropdownMenu">
+                        <a className={this.ethBatClass()} onClick={() => this.ethBatSelection()}>
+                            ETH/BAT
                         </a>
+                        <a className={this.ethDaiClass()} onClick={() => this.ethDaiSelection()}>
+                            ETH/DAI
+                        </a>
+                        <a className={this.ethMkrClass()} onClick={() => this.ethMkrSelection()}>
+                            ETH/MKR
+                        </a>
+                        <a className={this.ethOmgClass()} onClick={() => this.ethOmgSelection()}>
+                            ETH/OMG
+                        </a>
+                        <a className={this.ethZrxClass()} onClick={() => this.ethZrxSelection()}>
+                            ETH/ZRX
+                        </a>
+                        </div>
                     </div>
-                    <div className="navbar-end">
-                    <div className={this.dropdownListClass()}>
-                        <div className="dropdown-trigger">
-                            <button className="button dropdownButton" aria-haspopup="true" aria-controls="dropdown-menu" onClick={() => this.dropdownListClicked()}>
-                            <span>{this.GetSelectionText()}</span>
-                            <span className="icon is-small">
-                                <i className="fas fa-angle-down" aria-hidden="true"></i>
-                            </span>
-                            </button>
-                        </div>
-                        <div className="dropdown-menu" id="dropdown-menu" role="menu">
-                            <div className="dropdown-content dropdownMenu">
-                            <a className={this.ethBatClass()} onClick={() => this.ethBatSelection()}>
-                                ETH/BAT
-                            </a>
-                            <a className={this.ethDaiClass()} onClick={() => this.ethDaiSelection()}>
-                                ETH/DAI
-                            </a>
-                            <a className={this.ethMkrClass()} onClick={() => this.ethMkrSelection()}>
-                                ETH/MKR
-                            </a>
-                            <a className={this.ethOmgClass()} onClick={() => this.ethOmgSelection()}>
-                                ETH/OMG
-                            </a>
-                            <a className={this.ethZrxClass()} onClick={() => this.ethZrxSelection()}>
-                                ETH/ZRX
-                            </a>
-                            </div>
-                        </div>
-                        </div>
                     </div>
                 </div>
-                {this.GetExchange()}
-                {/* <section className="hero">
-                    <div className="hero-body">
-                        <h1 className="title">
-                            Uniswap Exchange
-                        </h1>
-                        <h3>Get DAI from Ether</h3>
-                        <div className="field">
-                            <div className="control">
-                                <input className="input is-primary" type="text" value={this.state.amountToExchange} onChange={this.handleEtherAmountToExchange}/>
-                            </div>
-                            <br/>
-                            <button className="button" onClick={() => this.GetDAIFromEther()}>Get</button>
-                        </div>
-                        <h3>DAI Balance : {this.state.daiBalance}</h3>
-                        <br/>
-                        <h3>Get Ether from DAI</h3>
-                        <div className="field">
-                            <div className="control">
-                                <input className="input is-primary" type="text" value={this.state.amountToExchange} onChange={this.handleDaiAmountToExchange}/>
-                            </div>
-                            <br/>
-                            <button className="button" onClick={() => this.GetEtherFromDAI()}>Get</button>
-                        </div>
-                        <h3>Ether Balance : {this.state.etherBalance}</h3>
-                        <br/>
-                        <br/>
-                        <h3>Approve Dai transfer</h3>
-                        <div className="field">
-                            <div className="control">
-                                <input className="input is-primary" type="text" onChange={this.handleApprovalDaiAmountToExchange}/>
-                            </div>
-                            <br/>
-                            <button className="button" onClick={() => this.ApproveTokensTransfer()}>Approve</button>
-                        </div>
-                    </div>
-                </section> */}
-                {/* <Exchange/> */}
-            </div>);            
-        });
-        // if (window.ethereum.selectedAddress != null) {
-        // return (<div>
-        //     <div className="navbar" >
-        //         <div className="navbar-brand">
-        //             <a className="navbar-item image" href="https://uniswap.io/">
-        //                 <img src="https://image.flaticon.com/icons/png/32/1475/1475932.png" width="30" height="36"/>  
-        //                 <p className="has-text-weight-semibold pCust"> Uniswap</p>
-        //             </a>
-        //         </div>
-        //         <div className="navbar-end">
-        //         <div className={this.dropdownListClass()}>
-        //             <div className="dropdown-trigger">
-        //                 <button className="button dropdownButton" aria-haspopup="true" aria-controls="dropdown-menu" onClick={() => this.dropdownListClicked()}>
-        //                 <span>{this.GetSelectionText()}</span>
-        //                 <span className="icon is-small">
-        //                     <i className="fas fa-angle-down" aria-hidden="true"></i>
-        //                 </span>
-        //                 </button>
-        //             </div>
-        //             <div className="dropdown-menu" id="dropdown-menu" role="menu">
-        //                 <div className="dropdown-content dropdownMenu">
-        //                 <a className={this.ethBatClass()} onClick={() => this.ethBatSelection()}>
-        //                     ETH/BAT
-        //                 </a>
-        //                 <a className={this.ethDaiClass()} onClick={() => this.ethDaiSelection()}>
-        //                     ETH/DAI
-        //                 </a>
-        //                 <a className={this.ethMkrClass()} onClick={() => this.ethMkrSelection()}>
-        //                     ETH/MKR
-        //                 </a>
-        //                 <a className={this.ethOmgClass()} onClick={() => this.ethOmgSelection()}>
-        //                     ETH/OMG
-        //                 </a>
-        //                 <a className={this.ethZrxClass()} onClick={() => this.ethZrxSelection()}>
-        //                     ETH/ZRX
-        //                 </a>
-        //                 </div>
-        //             </div>
-        //             </div>
-        //         </div>
-        //     </div>
-        //     {this.GetExchange()}
-            {/* <section className="hero">
-                <div className="hero-body">
-                    <h1 className="title">
-                        Uniswap Exchange
-                    </h1>
-                    <h3>Get DAI from Ether</h3>
-                    <div className="field">
-                        <div className="control">
-                            <input className="input is-primary" type="text" value={this.state.amountToExchange} onChange={this.handleEtherAmountToExchange}/>
-                        </div>
-                        <br/>
-                        <button className="button" onClick={() => this.GetDAIFromEther()}>Get</button>
-                    </div>
-                    <h3>DAI Balance : {this.state.daiBalance}</h3>
-                    <br/>
-                    <h3>Get Ether from DAI</h3>
-                    <div className="field">
-                        <div className="control">
-                            <input className="input is-primary" type="text" value={this.state.amountToExchange} onChange={this.handleDaiAmountToExchange}/>
-                        </div>
-                        <br/>
-                        <button className="button" onClick={() => this.GetEtherFromDAI()}>Get</button>
-                    </div>
-                    <h3>Ether Balance : {this.state.etherBalance}</h3>
-                    <br/>
-                    <br/>
-                    <h3>Approve Dai transfer</h3>
-                    <div className="field">
-                        <div className="control">
-                            <input className="input is-primary" type="text" onChange={this.handleApprovalDaiAmountToExchange}/>
-                        </div>
-                        <br/>
-                        <button className="button" onClick={() => this.ApproveTokensTransfer()}>Approve</button>
-                    </div>
-                </div>
-            </section> */}
-            {/* <Exchange/> */}
-        {/* </div>);
-        } */}
+            </div>
+            {this.GetExchange()}
+        </div>);
+        } 
 
 
-        // return (<div>
-        //     <div className="navbar" >
-        //     <div className="navbar-brand">
-        //         <a className="navbar-item image" href="https://uniswap.io/">
-        //             <img src="https://image.flaticon.com/icons/png/32/1475/1475932.png" width="30" height="36"/>  
-        //             <p className="has-text-weight-semibold"> Uniswap</p>
-        //         </a>
-        //     </div>
-        //     </div>
-        //     <br/>
-        //     <br/>
-        //     <h1 className="title">
-        //             MetaMask Missing
-        //         </h1>
-        //     <br/>
-        //     <br/>
-        //     <a className="button buttonCustom" href="https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=fr">Install MetaMask</a>
-        // </div>);
+        return (<div>
+            <div className="navbar" >
+            <div className="navbar-brand">
+                <a className="navbar-item image" href="https://uniswap.io/">
+                    <img src="https://image.flaticon.com/icons/png/32/1475/1475932.png" width="30" height="36"/>  
+                    <p className="has-text-weight-semibold"> Uniswap</p>
+                </a>
+            </div>
+            </div>
+            <br/>
+            <br/>
+            <h1 className="title">
+                    MetaMask Missing
+                </h1>
+            <br/>
+            <br/>
+            <a className="button buttonCustom" onClick={() => this.Connecting()}>Connect to Ethereum</a>
+            <br/>
+            <br/>
+            <a className="button buttonCustom" href="https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=fr">Install MetaMask</a>
+            <br/>
+            <br/>
+            <a className="button buttonCustom" href="https://play.google.com/store/apps/details?id=im.status.ethereum&hl=fr">Install Status.im for Mobile</a>
+        </div>);
     }
 }
 
