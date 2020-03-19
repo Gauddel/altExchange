@@ -129,15 +129,15 @@ class Exchange extends React.Component {
                     from : this.web3.currentProvider.selectedAddress,
                 };
 
-                exchangeContract.methods.getTokenToEthInputPrice(this.state.currency2AmountToExchange).call().then((price) => {
+                exchangeContract.methods.getTokenToEthInputPrice(this.web3.utils.toWei(this.state.currency2AmountToExchange, 'ether')).call().then((price) => {
                     console.log(price);
-                    exchangeContract.methods.tokenToEthSwapInput(this.web3.utils.toWei(this.state.currency2AmountToExchange, 'ether'), this.web3.utils.toWei(price, 'ether'), Date.now() + 120).estimateGas(optionGasEstimate).then((gasToPay) => {
+                    exchangeContract.methods.tokenToEthSwapInput(this.web3.utils.toWei(this.state.currency2AmountToExchange, 'ether'), price, Date.now() + 120).estimateGas(optionGasEstimate).then((gasToPay) => {
                         console.log(gasToPay)
                         var optionSend = {
                             from : this.web3.currentProvider.selectedAddress,
                             gasLimit : gasToPay
                         }
-                        exchangeContract.methods.tokenToEthSwapInput(this.web3.utils.toWei(this.state.currency2AmountToExchange, 'ether'), this.web3.utils.toWei(price, 'ether'), Date.now() + 120).send(optionSend).then((res) => {
+                        exchangeContract.methods.tokenToEthSwapInput(this.web3.utils.toWei(this.state.currency2AmountToExchange, 'ether'), price, Date.now() + 120).send(optionSend).then((res) => {
                             console.log(res);
                         }).catch((err) => {
                             console.log(err);
