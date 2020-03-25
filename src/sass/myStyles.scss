@@ -1,5 +1,193 @@
 @charset "utf-8";
 @import "../../node_modules/bulma/bulma.sass";
+@import "../../node_modules/bulma-extensions/src/sass/index.sass";
+
+@media only screen and (min-width: 501px) {
+    #App {
+        display: grid;
+        grid-template-rows: 100%;
+        grid-template-columns: 1fr 1fr 1fr;
+        min-height: 100% !important;
+    }
+
+    /* Appareils avec une résolution au-dessus de 500px */
+
+    // Provider missing component.
+
+    #providerMissing {
+        grid-column-start: 2;
+    }
+
+    .navbar-brand {
+        display: grid;
+        grid-template-rows: 100%;
+        grid-template-columns: 1fr 80%;
+    }
+
+    .navbar-item {
+        grid-column-start: 1;
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr;
+    }
+
+    // Connexion component.
+
+    // Trade or Deposit component.
+
+    #menu {
+        display: grid;
+        grid-template-rows: 1fr;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    #choice1 {
+        grid-column-start : 1;
+    }
+
+    #choice2 {
+        grid-column-start : 2;
+    }
+
+    // Deposit Component
+
+
+
+    // Trade Component
+
+    #sendSwitch {
+        display: grid;
+        grid-template-columns: 70% 30%;
+    }
+
+    #field {
+        grid-column-start: 2;
+    }
+
+    // Balance Component
+
+    #balance {
+        display: grid;
+        grid-template-columns: 50% 50%;
+        grid-template-rows: 1fr;
+    }
+
+    #currency1Balance {
+        grid-column-start: 1;
+    }
+
+    #currency2Balance {
+        grid-column-start: 2;
+    }
+
+    .title {
+        font-size: 2vw !important;
+    }
+
+    .subtitle {
+        font-size: 1vw !important;
+    }
+
+    #liquidityDiv {
+        display: grid;
+        grid-template-columns: 30% 70%;
+        grid-template-rows: 1fr;
+        margin-top: -15% !important;
+        padding-top: -15% !important;
+    }
+
+    #liquidity {
+        grid-column-start: 2;
+        font-size: 0.8vw;
+    }
+
+    #liquidityInput {
+        display: grid;
+        grid-template-columns: 20% 80%;
+        grid-template-rows : 1fr;
+    }
+
+    #liquidityCurrency {
+        grid-column-start: 1;
+    }
+
+    #amountToInput {
+        grid-column-start: 2;
+    }
+
+    #amountOfLiquidityOwned{
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr;
+    }
+
+    #liquidityOwned {
+        grid-column-start: 1;
+        grid-row-start: 1;
+    }
+
+    #inputTrade {
+        display : grid;
+        grid-template-columns: 25% 50% 25%;
+        grid-template-rows: 1fr;
+    }
+
+    #inputTradeCurrenyInputed {
+        grid-column-start: 1;
+    }
+
+    #inputTradeAmountInputed {
+        grid-column-start: 2;
+    }
+
+    #inputTradeAmountConverted {
+        grid-auto-columns: 3;
+    }
+}
+
+@media only screen and (max-width: 500px) {
+    #root {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: 100%;
+        min-height: 100% !important;
+    }
+
+    /* Appareils avec une résolution de 500 pixels ou moins */
+
+    // Provider missing component.
+
+    // Connexion component.
+
+    // Trade or Deposit component.
+
+    // Deposit Component
+
+    // Trade Component
+
+    #sendSwitch {
+        display: grid;
+        grid-template-columns: 70% 30%;
+    }
+
+    #field {
+        grid-column-start: 2;
+    }
+
+    #liquidityInput {
+        display: grid;
+        grid-template-columns: 20% 80%;
+        grid-template-rows : 1fr;
+    }
+
+    #liquidityCurrency {
+        grid-column-start: 1;
+    }
+
+    #amountToInput {
+        grid-column-start: 2;
+    }
+}
+
 
 .containerPerso {
     margin-top : 2% !important;
@@ -10,6 +198,10 @@ button, .button {
     background-color: #1e88e5 !important;
     color : white !important;
     justify-content: center;
+}
+
+.buttonT {
+    border: 2px solid #1e88e5 !important;
 }
 
 .buttonCustom {

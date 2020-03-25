@@ -1,6 +1,11 @@
 import React from 'react';
 import Web3 from 'web3';
 import Exchange from './Exchange';
+import ConnexionComponent from './ConnexionComponent';
+import MissingProviderComponent from './MissingProviderComponent';
+import MenuComponent from './MenuComponent';
+import Deposit from './Deposit';
+import CurrencyPairsComponent from './CurrencyPairsComponent';
 
 class MainPage extends React.Component {
 
@@ -49,7 +54,6 @@ class MainPage extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-
             dropdownListActive : false,
             ethBatSelected : false,
             ethDaiSelected : false,
@@ -57,6 +61,12 @@ class MainPage extends React.Component {
             ethOmgSelected : false,
             ethZrxSelected : false,
             connected : false,
+            providerInstalled : false,
+            wantToConnect : false,
+            wantToTrade : false,
+            wantToDeposit : false,
+            sendToSomeOne : false,
+            currencyPair: undefined,
         };
 
         this.dropdownListClass = this.dropdownListClass.bind(this);
@@ -74,100 +84,33 @@ class MainPage extends React.Component {
         this.GetSelectionText = this.GetSelectionText.bind(this);
         this.Initialize = this.Initialize.bind(this);
         this.GetExchange = this.GetExchange.bind(this);
+        this.Connection = this.Connection.bind(this);
+        this.Trade = this.Trade.bind(this);
+        this.Deposit = this.Deposit.bind(this);
+        this.sendToSomeone = this.sendToSomeone.bind(this);
+        this.getChoosenCurrencyPair = this.getChoosenCurrencyPair.bind(this);
+
+        this.Connecting();
     }
 
     GetEtherFromDAI() {
 
         this.initBalances();
 
-        // this.web3.eth.getBalance(this.web3.currentProvider.selectedAddress).then((balance) => {
-        //     this.setState({etherBalance : Math.round(this.web3.utils.fromWei(balance.toString(), 'ether')* 1000)/1000})});
-
-        // this.daiContract.methods.balanceOf(this.web3.currentProvider.selectedAddress).call().then((balance) => {
-        //     this.setState({daiBalance : Math.round(this.web3.utils.fromWei(balance.toString(), 'ether')* 1000)/1000})
-        // });
-
         this.setState({web3 : this.web3 });
 
         const daiTokenAddress = '0x2448ee2641d78cc42d7ad76498917359d961a783';
 
-        // mock what happen on exchange contract by reproducing each steps.
-
-
-
         this.factoryContract.methods.getExchange(daiTokenAddress).call().then((exchangeAddress) => {
             const exchangeContract = new this.web3.eth.Contract(this.exchangeABI, exchangeAddress);
-            // exchangeContract.methods.getTokenToEthInputPrice(this.state.daiAmountToExchange).call().then((price) => {
-            
-            //     exchangeContract.methods.tokenAddress().call().then((res) => {
-            //         var daiTokenContract = new this.web3.eth.Contract(this.daiABI, res);
-    
-            //         // Get Lastest Block timestamp
-    
-            //         this.web3.eth.getBlock("latest").then((block) => {
-            //             // if the following assert fail
-            //             // assert deadline >= block.timestamp and eth_bought > 0
-            //             if (Date.now() + 120 > block.timestamp && this.web3.utils.toWei(price.toString(), 'ether') > 0) {
-            //                 daiTokenContract.methods.balanceOf(exchangeAddress).call().then((daiBalanceOfExchangeContract) => {
-            //                     daiTokenContract.methods.allowance(this.web3.currentProvider.selectedAddress, exchangeAddress).call().then((amountAllowed) => {
-            //                         console.log('Number of DAI Allowed', amountAllowed);
-            //                     })
-
-            //                     console.log('DAI balance of Exchange contract', daiBalanceOfExchangeContract);
-
-            //                     this.web3.eth.getBalance(exchangeAddress).then((balanceOfExchangeContract) => {
-            //                         console.log('Balance of Exchange Contract', balanceOfExchangeContract);
-            //                         var output_reserve = parseInt(balanceOfExchangeContract);
-            //                         var input_reserve = parseInt(daiBalanceOfExchangeContract);
-            //                         var input_amount = parseInt(this.web3.utils.toWei(this.state.daiAmountToExchange), 'ether');
-
-            //                         if ( input_reserve > 0 && output_reserve > 0)
-            //                         {
-            //                             var numerator = input_amount * 997 * output_reserve;
-            //                             var denominator = (input_reserve * 1000) + input_amount * 997
-            //                             var wei_bought = (parseInt(numerator / denominator)).toString();
-            //                             console.log('input_reserve', input_reserve);
-            //                             console.log('input_amount', input_amount);
-            //                             console.log('output_reserve', output_reserve);
-            //                             console.log('Ether send', parseInt(numerator / denominator));
-            //                             console.log('Min eth', this.web3.utils.toWei(price, 'ether'));
-            //                             console.log('Min Eth - wei bought', this.web3.utils.toWei(price, 'ether') - wei_bought);
-            //                             console.log('wei_bought', wei_bought);
-            //                             if (wei_bought > this.web3.utils.toWei(price, 'ether')) {
-            //                                 console.log('It seems its a success!!!!!!!');
-            //                             }
-            //                             else {
-            //                                 console.log('Fail in line assert max_tokens >= tokens_sold');
-            //                             }
-            //                         }
-            //                         else {
-            //                             console.log('Fail in ligne assert input_reserve > 0 and output_reserve > 0');
-            //                         }
-
-
-            //                     });
-            //                 })
-            //             }
-            //             else {
-            //                 console.log('assert deadline >= block.timestamp and eth_bought > 0 STATEMENT FAIL!!!!!!!');
-            //             }
-            //         })
-    
-                    
-    
-            //     });
-            
-            // });
             
 
             var optionGasEstimate = {
                 from : this.web3.currentProvider.selectedAddress,
-                //value : this.web3.utils.toWei(this.state.etherAmountToExchange, 'ether')
             };
             console.log(exchangeContract);
             console.log(exchangeAddress);
             exchangeContract.methods.getTokenToEthInputPrice(this.state.daiAmountToExchange).call().then((price) => {
-                // console.log('LOGGGG!!!!',exchangeContract.methods);
                 console.log('Dai amount to exchange', this.state.daiAmountToExchange);
                 console.log('Minimum of ether to mint', price);
                 console.log('Time', Date.now() + 120);
@@ -178,8 +121,6 @@ class MainPage extends React.Component {
                    console.log('GAS TO PAY', gasToPay);
                         var optionSend = {
                             from : this.web3.currentProvider.selectedAddress,
-                            //gasLimit : this.web3.utils.toWei('1', 'ether'),
-                            //value : this.web3.utils.toWei(this.state.etherAmountToExchange, 'ether'),
                         }
                         exchangeContract.methods.tokenToEthSwapInput(this.web3.utils.toWei(this.state.daiAmountToExchange, 'ether'), this.web3.utils.toWei(price, 'ether'), Date.now() + 120).send(optionSend).then((res) => {
                             console.log(res);
@@ -189,8 +130,6 @@ class MainPage extends React.Component {
                     });
                 });
             });
-        //     console.log(exchangeContract)
-        // })
     }
 
     GetDAIFromEther() {
@@ -271,7 +210,8 @@ class MainPage extends React.Component {
         });
     }
 
-    GetExchange() {
+    getChoosenCurrencyPair() {
+        var tokenSelected = false;
         var token = '';
         var exchange = '';
         var currency1IconPath = '';
@@ -279,12 +219,14 @@ class MainPage extends React.Component {
         var abi = '';
         var currency1 = '';
         var currency2 = '';
+
         if (this.state.ethBatSelected)
         {
             if (this.state.dropdownListActive) {
                 return (<div></div>);
             }
             console.log('BAT');
+            tokenSelected = true;
             token = this.tokenList.BAT.token;
             exchange = this.tokenList.BAT.exchange;
             currency2IconPath = this.tokenList.BAT.iconPath;
@@ -292,15 +234,14 @@ class MainPage extends React.Component {
             abi = this.tokenList.BAT.abi;
             currency1 = 'ETH';
             currency2 = 'BAT';
-            return <Exchange currency2={currency2} currency1={currency1} abi={abi} token={token} exchange={exchange} currency1IconPath={currency1IconPath} currency2IconPath={currency2IconPath}/>
         }
-
         else if (this.state.ethDaiSelected)
         {
             if (this.state.dropdownListActive) {
                 return (<div></div>);
             }
             console.log('DAI');
+            tokenSelected = true;
             token = this.tokenList.DAI.token;
             exchange = this.tokenList.DAI.exchange;
             currency2IconPath = this.tokenList.DAI.iconPath;
@@ -308,15 +249,14 @@ class MainPage extends React.Component {
             abi = this.tokenList.DAI.abi;
             currency1 = 'ETH';
             currency2 = 'DAI';
-            return <Exchange currency2={currency2} currency1={currency1} abi={abi} token={token} exchange={exchange} currency1IconPath={currency1IconPath} currency2IconPath={currency2IconPath}/>
         }
-
         else if (this.state.ethMkrSelected)
         {
             if (this.state.dropdownListActive) {
                 return (<div></div>);
             }
             console.log('MKR');
+            tokenSelected = true;
             token = this.tokenList.MKR.token;
             exchange = this.tokenList.MKR.exchange;
             currency2IconPath = this.tokenList.MKR.iconPath;
@@ -324,15 +264,14 @@ class MainPage extends React.Component {
             abi = this.tokenList.MKR.abi;
             currency1 = 'ETH';
             currency2 = 'MKR';
-            return <Exchange currency2={currency2} currency1={currency1} abi={abi} token={token} exchange={exchange} currency1IconPath={currency1IconPath} currency2IconPath={currency2IconPath}/>
         }
-
         else if (this.state.ethOmgSelected)
         {
             if (this.state.dropdownListActive) {
                 return (<div></div>);
             }
             console.log('OMG');
+            tokenSelected = true;
             token = this.tokenList.OMG.token;
             exchange = this.tokenList.OMG.exchange;
             currency2IconPath = this.tokenList.OMG.iconPath;
@@ -340,15 +279,14 @@ class MainPage extends React.Component {
             abi = this.tokenList.OMG.abi;
             currency1 = 'ETH';
             currency2 = 'OMG';
-            return <Exchange currency2={currency2} currency1={currency1} abi={abi} token={token} exchange={exchange} currency1IconPath={currency1IconPath} currency2IconPath={currency2IconPath}/>
         }
-
         else if (this.state.ethZrxSelected)
         {
             if (this.state.dropdownListActive) {
                 return (<div></div>);
             }
             console.log('ZRX');
+            tokenSelected = true;
             token = this.tokenList.ZRX.token;
             exchange = this.tokenList.ZRX.exchange;
             currency2IconPath = this.tokenList.ZRX.iconPath;
@@ -356,10 +294,34 @@ class MainPage extends React.Component {
             abi = this.tokenList.ZRX.abi;
             currency1 = 'ETH';
             currency2 = 'ZRX';
-            return <Exchange currency2={currency2} currency1={currency1} abi={abi} token={token} exchange={exchange} currency1IconPath={currency1IconPath} currency2IconPath={currency2IconPath}/>
         }
-        return (<div></div>);
 
+        return { tokenSelected : tokenSelected,
+            token: token,
+            exchange: exchange,
+            currency2IconPath: currency2IconPath,
+            currency1IconPath : currency1IconPath,
+            abi : abi,
+            currency1 : currency1,
+            currency2 : currency2,
+        };
+    }
+
+    GetExchange() {
+        var currencyPairs = this.getChoosenCurrencyPair();
+
+        if (!currencyPairs.tokenSelected) {
+            return (<div></div>);
+        }
+
+        return <Exchange currency2={currencyPairs.currency2}
+         currency1={currencyPairs.currency1}
+          abi={currencyPairs.abi}
+          token={currencyPairs.token}
+          exchange={currencyPairs.exchange}
+          currency1IconPath={currencyPairs.currency1IconPath}
+          currency2IconPath={currencyPairs.currency2IconPath}
+          send={this.state.sendToSomeOne}/>;
     }
 
     handleEtherAmountToExchange(events) {
@@ -443,7 +405,6 @@ class MainPage extends React.Component {
             ethOmgSelected : false,
             ethZrxSelected : false,
         });
-        //this.forceUpdate();
     }
 
     ethDaiSelection() {
@@ -455,7 +416,6 @@ class MainPage extends React.Component {
             ethOmgSelected : false,
             ethZrxSelected : false,
         });
-        //this.forceUpdate();
     }
 
     ethMkrSelection() {
@@ -467,7 +427,6 @@ class MainPage extends React.Component {
             ethZrxSelected : false,
             dropdownListActive : ! this.state.dropdownListActive
         });
-        //this.forceUpdate();
     }
 
     ethOmgSelection() {
@@ -479,7 +438,6 @@ class MainPage extends React.Component {
             ethBatSelected : false,
             ethZrxSelected : false,
         });
-        //this.forceUpdate();
     }
 
     ethZrxSelection() {
@@ -491,7 +449,6 @@ class MainPage extends React.Component {
             ethOmgSelected : false,
             ethBatSelected : false,
         });
-        //this.forceUpdate();
     }
 
     dropdownListClicked() {
@@ -521,88 +478,109 @@ class MainPage extends React.Component {
         return 'Select Currency Pair';
     }
 
+    Connection() {
+        this.setState({
+            wantToConnect : true,
+        }, () => this.Connecting());
+    }
+
     Connecting() {
-        if (window.ethereum) {
+        if (this.state.wantToConnect) {
             window.web3 = new Web3(window.ethereum);
             window.ethereum.enable().then(() => {
                 this.setState({
                     connected : true,
+                    providerInstalled : true,
                 });
             });
-        }        
+        }
+        if (window.ethereum) {
+            this.setState({
+                connected : false,
+                providerInstalled : true,
+            });
+        }  
     }
 
-    render() {        
-        if (this.state.connected) {
-        return (<div>
-            <div className="navbar" >
-                <div className="navbar-brand">
-                    <a className="navbar-item image" href="https://uniswap.io/">
-                        <img src="https://image.flaticon.com/icons/png/32/1475/1475932.png" width="30" height="36"/>  
-                        <p className="has-text-weight-semibold pCust"> Uniswap</p>
-                    </a>
-                </div>
-                <div className="navbar-end">
-                <div className={this.dropdownListClass()}>
-                    <div className="dropdown-trigger">
-                        <button className="button dropdownButton" aria-haspopup="true" aria-controls="dropdown-menu" onClick={() => this.dropdownListClicked()}>
-                        <span>{this.GetSelectionText()}</span>
-                        <span className="icon is-small">
-                            <i className="fas fa-angle-down" aria-hidden="true"></i>
-                        </span>
-                        </button>
-                    </div>
-                    <div className="dropdown-menu" id="dropdown-menu" role="menu">
-                        <div className="dropdown-content dropdownMenu">
-                        <a className={this.ethBatClass()} onClick={() => this.ethBatSelection()}>
-                            ETH/BAT
-                        </a>
-                        <a className={this.ethDaiClass()} onClick={() => this.ethDaiSelection()}>
-                            ETH/DAI
-                        </a>
-                        <a className={this.ethMkrClass()} onClick={() => this.ethMkrSelection()}>
-                            ETH/MKR
-                        </a>
-                        <a className={this.ethOmgClass()} onClick={() => this.ethOmgSelection()}>
-                            ETH/OMG
-                        </a>
-                        <a className={this.ethZrxClass()} onClick={() => this.ethZrxSelection()}>
-                            ETH/ZRX
-                        </a>
+    Deposit() {
+        this.setState({
+            wantToDeposit : true,
+            wantToTrade : false,
+        });
+    }
+
+    Trade() {
+        this.setState({
+            wantToDeposit: false,
+            wantToTrade: true,
+        })
+    }
+
+    sendToSomeone() {
+        this.setState({
+            sendToSomeOne : !this.state.sendToSomeOne,
+        })
+    }
+
+    render() {
+        if (this.state.connected && this.state.providerInstalled && (!this.state.wantToTrade && !this.state.wantToDeposit)) {
+            return (<MenuComponent trade={() => this.Trade()} deposit={() => this.Deposit()}/>);
+        }
+
+        if (this.state.wantToTrade) {
+            var currencyPair = this.getChoosenCurrencyPair();
+            return (<div id="providerMissing">
+                    <br/>
+                    <div id="sendSwitch">
+                        <div className="field" id="field">
+                            <input id="switchExample" type="checkbox" name="switchExample" className="switch is-info" checked={this.state.sendToSomeOne} onChange={this.sendToSomeone}/>
+                            <label htmlFor="switchExample">Send</label>
                         </div>
                     </div>
-                    </div>
-                </div>
-            </div>
-            {this.GetExchange()}
-        </div>);
-        } 
+                <CurrencyPairsComponent dropdownListClass={() => this.dropdownListClass()}
+                dropdownListClicked={() => this.dropdownListClicked()}
+                GetSelectionText={() => this.GetSelectionText()}
+                ethBatClass={() => this.ethBatClass()}
+                ethBatSelection={() => this.ethBatSelection()}
+                ethDaiClass={() => this.ethDaiClass()}
+                ethDaiSelection={() => this.ethDaiSelection()}
+                ethMkrClass={() => this.ethMkrClass()}
+                ethMkrSelection={() => this.ethMkrSelection()}
+                ethOmgClass={()=> this.ethOmgClass()}
+                ethOmgSelection={() => this.ethOmgSelection()}
+                ethZrxClass={() => this.ethZrxClass()}
+                ethZrxSelection={()=> this.ethZrxSelection()}
+                />
+                {this.GetExchange()}
+            </div>);
+        }
 
+        if(this.state.wantToDeposit) {
+            var currencyPair = this.getChoosenCurrencyPair();
+            return (<Deposit currencyPair={currencyPair}
+            dropdownListClass={() => this.dropdownListClass()}
+            dropdownListClicked={() => this.dropdownListClicked()}
+            GetSelectionText={() => this.GetSelectionText()}
+            ethBatClass={() => this.ethBatClass()}
+            ethBatSelection={() => this.ethBatSelection()}
+            ethDaiClass={() => this.ethDaiClass()}
+            ethDaiSelection={() => this.ethDaiSelection()}
+            ethMkrClass={() => this.ethMkrClass()}
+            ethMkrSelection={() => this.ethMkrSelection()}
+            ethOmgClass={()=> this.ethOmgClass()}
+            ethOmgSelection={() => this.ethOmgSelection()}
+            ethZrxClass={() => this.ethZrxClass()}
+            ethZrxSelection={()=> this.ethZrxSelection()}/>);
+        }
 
-        return (<div>
-            <div className="navbar" >
-            <div className="navbar-brand">
-                <a className="navbar-item image" href="https://uniswap.io/">
-                    <img src="https://image.flaticon.com/icons/png/32/1475/1475932.png" width="30" height="36"/>  
-                    <p className="has-text-weight-semibold"> Uniswap</p>
-                </a>
-            </div>
-            </div>
-            <br/>
-            <br/>
-            <h1 className="title">
-                    MetaMask Missing
-                </h1>
-            <br/>
-            <br/>
-            <a className="button buttonCustom" onClick={() => this.Connecting()}>Connect to Ethereum</a>
-            <br/>
-            <br/>
-            <a className="button buttonCustom" href="https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=fr">Install MetaMask</a>
-            <br/>
-            <br/>
-            <a className="button buttonCustom" href="https://play.google.com/store/apps/details?id=im.status.ethereum&hl=fr">Install Status.im for Mobile</a>
-        </div>);
+        if (this.state.providerInstalled) {
+            return (
+                    <ConnexionComponent connection={() => this.Connection()}/>
+            );
+        }
+
+        this.Connecting();
+        return (<MissingProviderComponent/>);
     }
 }
 

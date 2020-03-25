@@ -4,7 +4,18 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(<div>
+    <div className="navbar" >
+      <div className="navbar-brand">
+          <a className="navbar-item image" href="http://localhost:3000/">
+              <img src="https://image.flaticon.com/icons/png/32/1475/1475932.png" width="30" height="36"/>  
+              <p className="has-text-weight-semibold"> AltExchange</p>
+          </a>
+      </div>
+    </div>
+    <App />
+</div>
+, document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
