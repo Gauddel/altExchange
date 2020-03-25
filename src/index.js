@@ -7,7 +7,7 @@ import * as serviceWorker from './serviceWorker';
 ReactDOM.render(<div>
     <div className="navbar" >
       <div className="navbar-brand">
-          <a className="navbar-item image" href="http://localhost:3000/">
+          <a className="navbar-item image" href="https://erc20exchange.herokuapp.com/">
               <img src="https://image.flaticon.com/icons/png/32/1475/1475932.png" width="30" height="36"/>  
               <p className="has-text-weight-semibold"> AltExchange</p>
           </a>
