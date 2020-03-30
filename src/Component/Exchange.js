@@ -98,7 +98,7 @@ class Exchange extends React.Component {
                 from : this.web3.currentProvider.selectedAddress,
                 value : this.web3.utils.toWei(this.state.currency1AmountToExchange, 'ether')
             };
-            exchangeContract.methods.getEthToTokenOutputPrice(this.web3.utils.toWei(this.state.currency1AmountToExchange, 'ether')).call().then((price) => {
+            exchangeContract.methods.getEthToTokenInputPrice(this.web3.utils.toWei(this.state.currency1AmountToExchange, 'ether')).call().then((price) => {
                exchangeContract.methods.ethToTokenTransferInput(price, Date.now() + 120, receiver).estimateGas(optionGasEstimate).then((gasToPay) => {
                     var optionSend = {
                             from : this.web3.currentProvider.selectedAddress,
