@@ -1,8 +1,6 @@
 import React from 'react';
 import Web3 from 'web3';
-import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
 import BalanceComponent from './BalanceComponent';
-import { timingSafeEqual } from 'crypto';
 
 class Exchange extends React.Component {
 
@@ -16,6 +14,7 @@ class Exchange extends React.Component {
     currency1ToCurrency2Price = [];
     currency2ToCurrency1Price = [];
     dates = [];
+    intervalID;
 
     constructor(props) {
         super(props);
@@ -48,7 +47,7 @@ class Exchange extends React.Component {
             currency2AmountToTransferOk : false,
             currency1AmountToTransferClass : 'input is-primary',
             currency2AmountToTransferClass : 'input is-primary',
-            
+            inverseExchangeRate : ''
         };
 
         this.web3 = new Web3(window.ethereum);
@@ -62,29 +61,22 @@ class Exchange extends React.Component {
         this.handleCurrency2AmountToExchange = this.handleCurrency2AmountToExchange.bind(this);
         this.approveTokensTransfer = this.approveTokensTransfer.bind(this);
         this.sendInput = this.sendInput.bind(this);
-        this.getExchangeRate = this.getExchangeRate.bind(this);
         this.getBalance = this.getBalance.bind(this);
         this.checkCurrency1AmountToTransferToBalance = this.checkCurrency1AmountToTransferToBalance.bind(this);
         this.checkCurrency2AmountToTransferToBalance = this.checkCurrency2AmountToTransferToBalance.bind(this);
         this.handleSendAddress = this.handleSendAddress.bind(this);
         this.sendOrTrade = this.sendOrTrade.bind(this);
-        this.getExchangeRate();
         this.getBalance();
     }
 
     componentDidMount() {
+
         this.getBalance();
+        this.intervalID = setInterval(this.getBalance.bind(this), 500);
     }
 
-    getExchangeRate() {
-        this.factoryContract.methods.getExchange(this.state.token).call().then((exchangeAddress) => {
-            const exchangeContract = new this.web3.eth.Contract(this.exchangeABI, exchangeAddress);
-            exchangeContract.methods.getEthToTokenInputPrice(this.web3.utils.toWei((1).toString(), 'ether')).call().then((exchangeRate) => {
-                this.setState({
-                    exchangeRate : Math.round(this.web3.utils.fromWei(exchangeRate.toString(), 'ether')*100)/100,
-                })
-            })
-        });
+    componentWillUnmount() {
+        clearInterval(this.intervalID);
     }
 
     getBalance() {
@@ -103,6 +95,25 @@ class Exchange extends React.Component {
                     this.setState({currency2BalanceRounded :(Math.round(this.web3.utils.fromWei(balance.toString(), 'ether')*100)/100).toFixed(2)});
                     });
                 });
+
+            this.factoryContract.methods.getExchange(this.state.token).call().then((exchangeContractAddress) => {
+                var exchangeContract = new this.web3.eth.Contract(this.exchangeABI, exchangeContractAddress);
+                exchangeContract.methods.getEthToTokenInputPrice(this.web3.utils.toWei('1', 'ether')).call().then((exchangeRate) => {
+                    this.setState({
+                        exchangeRate : this.web3.utils.fromWei(exchangeRate.toString(), 'ether'),
+                        exchangeRateRounded : Math.round(this.web3.utils.fromWei(exchangeRate.toString(), 'ether')*100)/100,
+                    })
+                });
+            });
+
+            this.factoryContract.methods.getExchange(this.state.token).call().then((exchangeContractAddress) => {
+                var exchangeContract = new this.web3.eth.Contract(this.exchangeABI, exchangeContractAddress);
+                exchangeContract.methods.getTokenToEthInputPrice(this.web3.utils.toWei('1', 'ether')).call().then((inverseExchangeRate) => {
+                    this.setState({
+                        inverseExchangeRate : this.web3.utils.fromWei(inverseExchangeRate, 'ether')
+                    });
+                });
+            });
         }   
     }
 
@@ -228,17 +239,12 @@ class Exchange extends React.Component {
             return;
         }
 
-        this.factoryContract.methods.getExchange(this.state.token).call().then((exchangeContractAddress) => {
-            var exchangeContract = new this.web3.eth.Contract(this.exchangeABI, exchangeContractAddress);
-            exchangeContract.methods.getEthToTokenInputPrice(this.web3.utils.toWei(currency1Amount, 'ether')).call().then((price) => {
-            console.log(currency1Amount)
-                
-                this.setState({
-                    currency1AmountToExchange : currency1Amount,
-                    currency2AmountToGet : Math.round(this.web3.utils.fromWei(price.toString(), 'ether')*100)/100,
-                },this.checkCurrency1AmountToTransferToBalance(currency1Amount) );
-            });            
+        this.setState({
+            currency1AmountToExchange : currency1Amount,
+            currency2AmountToGet : Math.round(currency1Amount * this.state.exchangeRate*100)/100
         });
+
+        this.checkCurrency1AmountToTransferToBalance(currency1Amount);
     }
 
     checkCurrency1AmountToTransferToBalance(currency1Amount) {
@@ -251,22 +257,16 @@ class Exchange extends React.Component {
             return;
         }
 
-        this.web3.eth.getAccounts().then((accounts) => {
-            var mainAccount = accounts[0];
-
-            this.web3.eth.getBalance(mainAccount).then((balance) => {
-                if (Number(currency1Amount) > Number(this.web3.utils.fromWei(balance, 'ether'))) {
-                    this.setState({
-                        currency1AmountToTransferOk : false,
-                        currency1AmountToTransferClass : 'input is-primary has-text-danger',
-                    });
-                    return;
-                }
-                this.setState({
-                    currency1AmountToTransferOk : true,
-                    currency1AmountToTransferClass : 'input is-primary has-text-primary',
-                });
+        if (Number(currency1Amount) > Number(this.state.currency1Balance)) {
+            this.setState({
+                currency1AmountToTransferOk : false,
+                currency1AmountToTransferClass : 'input is-primary has-text-danger',
             });
+            return;
+        }
+        this.setState({
+            currency1AmountToTransferOk : true,
+            currency1AmountToTransferClass : 'input is-primary has-text-primary',
         });
     }
 
@@ -280,16 +280,12 @@ class Exchange extends React.Component {
             return;
         }
 
-        this.factoryContract.methods.getExchange(this.state.token).call().then((exchangeContractAddress) => {
-            var exchangeContract = new this.web3.eth.Contract(this.exchangeABI, exchangeContractAddress);
-            exchangeContract.methods.getTokenToEthInputPrice(this.web3.utils.toWei(currency2Amount, 'ether')).call().then((price) => {
-                this.setState({
-                    currency2AmountToExchange : currency2Amount,
-                    currency1AmountToGet : Math.round(this.web3.utils.fromWei(price.toString(), 'ether')*100)/100,
-                });
-                this.checkCurrency2AmountToTransferToBalance(currency2Amount);
-            });            
+        this.setState({
+            currency2AmountToExchange : currency2Amount,
+            currency1AmountToGet : Math.round(currency2Amount * this.state.inverseExchangeRate * 100)/100
+            
         });
+        this.checkCurrency2AmountToTransferToBalance(currency2Amount);
     }
 
     checkCurrency2AmountToTransferToBalance(currency2Amount) {
@@ -302,22 +298,16 @@ class Exchange extends React.Component {
             return;
         }
 
-        this.web3.eth.getAccounts().then((accounts) => {
-            var mainAccount = accounts[0];
-            var tokenContract = new this.web3.eth.Contract(this.state.abi, this.state.token);
-            tokenContract.methods.balanceOf(mainAccount).call().then((balance) => {
-                if (Number(currency2Amount) > Number(this.web3.utils.fromWei(balance, 'ether'))) {
-                    this.setState({
-                        currency2AmountToTransferOk : false,
-                        currency2AmountToTransferClass : 'input is-primary has-text-danger',
-                    });
-                    return;
-                }
-                this.setState({
-                    currency2AmountToTransferOk : true,
-                    currency2AmountToTransferClass : 'input is-primary has-text-primary',
-                });
+        if (Number(currency2Amount) > Number(this.state.currency2Balance)) {
+            this.setState({
+                currency2AmountToTransferOk : false,
+                currency2AmountToTransferClass : 'input is-primary has-text-danger',
             });
+            return;
+        }
+        this.setState({
+            currency2AmountToTransferOk : true,
+            currency2AmountToTransferClass : 'input is-primary has-text-primary',
         });
     }
 
@@ -367,7 +357,7 @@ class Exchange extends React.Component {
     }
 
     render() {
-        this.getExchangeRate();
+        //this.getExchangeRate();
         return (<section className="hero">
                 <BalanceComponent currency1={this.state.currency1}
                 currency2={this.state.currency2}
@@ -383,7 +373,7 @@ class Exchange extends React.Component {
                         </a>
                     </div>
                     <div className="container contCust has-text-centered has-text-justified">
-                    <p className="has-text-weight-semibold pCustom">{this.state.exchangeRate}</p>
+                    <p className="has-text-weight-semibold pCustom">{this.state.exchangeRateRounded}</p>
                     </div>
                     {this.sendInput()}
                     <div className="field has-addons" id="inputTrade">

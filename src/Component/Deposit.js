@@ -10,6 +10,7 @@ class Deposit extends React.Component {
     factoryAddress = '0xf5D915570BC477f9B8D6C0E980aA81757A3AaC36';
     factoryABI = [{"name": "NewExchange", "inputs": [{"type": "address", "name": "token", "indexed": true}, {"type": "address", "name": "exchange", "indexed": true}], "anonymous": false, "type": "event"}, {"name": "initializeFactory", "outputs": [], "inputs": [{"type": "address", "name": "template"}], "constant": false, "payable": false, "type": "function", "gas": 35725}, {"name": "createExchange", "outputs": [{"type": "address", "name": "out"}], "inputs": [{"type": "address", "name": "token"}], "constant": false, "payable": false, "type": "function", "gas": 187911}, {"name": "getExchange", "outputs": [{"type": "address", "name": "out"}], "inputs": [{"type": "address", "name": "token"}], "constant": true, "payable": false, "type": "function", "gas": 715}, {"name": "getToken", "outputs": [{"type": "address", "name": "out"}], "inputs": [{"type": "address", "name": "exchange"}], "constant": true, "payable": false, "type": "function", "gas": 745}, {"name": "getTokenWithId", "outputs": [{"type": "address", "name": "out"}], "inputs": [{"type": "uint256", "name": "token_id"}], "constant": true, "payable": false, "type": "function", "gas": 736}, {"name": "exchangeTemplate", "outputs": [{"type": "address", "name": "out"}], "inputs": [], "constant": true, "payable": false, "type": "function", "gas": 633}, {"name": "tokenCount", "outputs": [{"type": "uint256", "name": "out"}], "inputs": [], "constant": true, "payable": false, "type": "function", "gas": 663}];
     factoryContract;
+    intervalID;
 
     constructor(props) {
         super(props);
@@ -30,6 +31,10 @@ class Deposit extends React.Component {
             pooledToken: '',
             pooledTokenEnoughBalance : false,
             pooledTokenEnoughClass : 'input is-primary',
+            currency2AmountToDepositRatio : '',
+            currency1AmountToDepositRatio : '',
+            balanceOfEther : '',
+            balanceOfToken : '',
         }
 
         this.handleCurrency1AmountToDeposit = this.handleCurrency1AmountToDeposit.bind(this);
@@ -40,6 +45,55 @@ class Deposit extends React.Component {
         this.checkCurrency1EnoughtBalance = this.checkCurrency1EnoughtBalance.bind(this);
         this.checkCurrency2EnoughtBalance = this.checkCurrency2EnoughtBalance.bind(this);
         this.checkPooledTokenEnoughtBalance = this.checkPooledTokenEnoughtBalance.bind(this);
+        this.getComputation = this.getComputation.bind(this);
+        this.getComputation();
+    }
+    
+    componentDidMount() {
+        this.getComputation();
+        this.intervalID = setInterval(this.getComputation.bind(this), 1000);
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.intervalID);    
+    }
+
+    getComputation() {
+        if(this.props.currencyPair.token == '' || this.props.currencyPair.abi == '') {
+            return;
+        }
+        this.factoryContract = new this.state.web3.eth.Contract(this.factoryABI, this.factoryAddress);
+
+        this.factoryContract.methods.getExchange(this.props.currencyPair.token).call().then((exchangeAddress) => {
+            var exchangeContract = new this.state.web3.eth.Contract(this.exchangeABI, exchangeAddress);
+            exchangeContract.methods.getEthToTokenInputPrice(this.state.web3.utils.toWei('1', 'ether')).call().then((currency2AmountToDepositRatio) => {
+                this.setState({
+                    currency2AmountToDepositRatio : this.state.web3.utils.fromWei(currency2AmountToDepositRatio, 'ether')
+                })
+            });
+            exchangeContract.methods.getTokenToEthInputPrice(this.state.web3.utils.toWei('1', 'ether')).call().then((currency1AmountToDepositRatio) => {
+                this.setState({
+                    currency1AmountToDepositRatio : this.state.web3.utils.fromWei(currency1AmountToDepositRatio, 'ether')
+                })
+            });
+        });
+        this.state.web3.eth.getAccounts().then((accounts) => {
+            var mainAccount = accounts[0];
+            this.state.web3.eth.getBalance(mainAccount).then((balanceOfEther) => {
+                this.setState({
+                    balanceOfEther : this.state.web3.utils.fromWei(balanceOfEther, 'ether')
+                })
+            });
+        });
+        var tokenContract = new this.state.web3.eth.Contract(this.props.currencyPair.abi, this.props.currencyPair.token);
+        this.state.web3.eth.getAccounts().then((accounts) => {
+            var mainAccount = accounts[0];
+            tokenContract.methods.balanceOf(mainAccount).call().then((balanceOfToken) => {
+                this.setState({
+                    balanceOfToken : this.state.web3.utils.fromWei(balanceOfToken, 'ether')
+                })
+            });
+        });        
     }
 
     handleCurrency1AmountToDeposit(events) {
@@ -55,38 +109,27 @@ class Deposit extends React.Component {
             return;
         }
 
+        var val = events.target.value;
+        this.setState({
+            currency1AmountToDeposit : val,
+            currency2AmountToDeposit : val * this.state.currency2AmountToDepositRatio
+        });
         this.checkCurrency1EnoughtBalance(events.target.value);
         this.checkCurrency2EnoughtBalance(events.target.value);
-        var val = events.target.value;
-            this.factoryContract = new this.state.web3.eth.Contract(this.factoryABI, this.factoryAddress);
-            this.factoryContract.methods.getExchange(this.props.currencyPair.token).call().then((exchangeAddress) => {
-                var exchangeContract = new this.state.web3.eth.Contract(this.exchangeABI, exchangeAddress);
-                exchangeContract.methods.getEthToTokenInputPrice(this.state.web3.utils.toWei(val, 'ether')).call().then((currency2AmountToDeposit) => {
-                    this.setState({
-                        currency1AmountToDeposit : val,
-                        currency2AmountToDeposit : this.state.web3.utils.fromWei(currency2AmountToDeposit, 'ether'),
-                    });
-                });
-            });
     }
 
     checkCurrency1EnoughtBalance(balance) {
-        this.state.web3.eth.getAccounts().then((accounts) => {
-            var mainAccount = accounts[0];
-            this.state.web3.eth.getBalance(mainAccount).then((balanceOfEther) => {
-                if(this.state.web3.utils.fromWei(balanceOfEther) > balance) {
-                    this.setState({
-                        currency1EnoughBalance : true,
-                        currency1EnoughClass : 'input is-primary has-text-primary',
-                    });
-                    return;
-                }
-                this.setState({
-                    currency1EnoughBalance : false,
-                    currency1EnoughClass : 'input is-primary has-text-danger',
-                });                
-            })
-        })
+        if(this.state.balanceOfEther > balance) {
+            this.setState({
+                currency1EnoughBalance : true,
+                currency1EnoughClass : 'input is-primary has-text-primary',
+            });
+            return;
+        }
+        this.setState({
+            currency1EnoughBalance : false,
+            currency1EnoughClass : 'input is-primary has-text-danger',
+        });
     }
 
     handleCurrency2AmountToDeposit(events) {
@@ -102,42 +145,28 @@ class Deposit extends React.Component {
             return;
         }
 
+        var val = events.target.value;
+        this.setState({
+            currency1AmountToDeposit : val * this.state.currency1AmountToDepositRatio,
+            currency2AmountToDeposit : val,
+        });
+
         this.checkCurrency1EnoughtBalance(events.target.value);
         this.checkCurrency2EnoughtBalance(events.target.value);
-        var val = events.target.value;
-        if(this.props.currencyPair.tokenSelected === true && this.props.currencyPair.abi !== ''){
-            this.factoryContract = new this.state.web3.eth.Contract(this.factoryABI, this.factoryAddress);
-            this.factoryContract.methods.getExchange(this.props.currencyPair.token).call().then((exchangeAddress) => {
-                var exchangeContract = new this.state.web3.eth.Contract(this.exchangeABI, exchangeAddress);
-                exchangeContract.methods.getTokenToEthInputPrice(this.state.web3.utils.toWei(val, 'ether')).call().then((currency1AmountToDeposit) => {
-                    this.setState({
-                        currency1AmountToDeposit : this.state.web3.utils.fromWei(currency1AmountToDeposit, 'ether'),
-                        currency2AmountToDeposit : val,
-                    });
-                });
-            });
-        }
     }
 
     checkCurrency2EnoughtBalance(balance) {
-        var tokenContract = new this.state.web3.eth.Contract(this.props.currencyPair.abi, this.props.currencyPair.token);
-        this.state.web3.eth.getAccounts().then((accounts) => {
-            var mainAccount = accounts[0];
-            tokenContract.methods.balanceOf(mainAccount).call().then((balanceOfToken) => {
-                if(this.state.web3.utils.fromWei(balanceOfToken) > balance) {
-                    this.setState({
-                        currency2EnoughBalance : true,
-                        currency2EnoughClass : 'input is-primary has-text-primary',
-                    });
-                    return;
-                }
-                this.setState({
-                    currency2EnoughBalance : false,
-                    currency2EnoughClass : 'input is-primary has-text-danger',
-                });  
-            })
-
-        })
+        if(this.state.balanceOfToken > balance) {
+            this.setState({
+                currency2EnoughBalance : true,
+                currency2EnoughClass : 'input is-primary has-text-primary',
+            });
+            return;
+        }
+        this.setState({
+            currency2EnoughBalance : false,
+            currency2EnoughClass : 'input is-primary has-text-danger',
+        });
     }
 
     deposit() {
