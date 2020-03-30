@@ -10,35 +10,36 @@ class BalanceComponent extends React.Component {
         this.state = {
             currency1 : this.props.currency1,
             currency2 : this.props.currency2,
-            currency2TokenAddress : this.props.token,
-            web3 : new Web3(window.ethereum),
-            abi : this.props.abi,
-            currency1Balance : 0,
-            currency1BalanceRounded : 0,
-            currency2Balance : 0,
-            currency2BalanceRounded : 0,
-            exchangeRate :0,
+            // currency2TokenAddress : this.props.token,
+            // web3 : new Web3(window.ethereum),
+            // abi : this.props.abi,
+            // currency1Balance : 0,
+            // currency1BalanceRounded : 0,
+            // currency2Balance : 0,
+            // currency2BalanceRounded : 0,
+            // exchangeRate :0,
         };
     }
 
-    componentWillMount(nextProps, nextState) {
-        if(this.props.abi !=='') {
-            this.state.web3.eth.getAccounts().then((accounts) => {
-                var mainAccount = accounts[0];
-                this.state.web3.eth.getBalance(mainAccount).then((balance) => {
-                    this.setState({currency1Balance : this.state.web3.utils.fromWei(balance.toString(), 'ether')})
-                    this.setState({currency1BalanceRounded :(Math.round(this.state.web3.utils.fromWei(balance.toString(), 'ether')*100)/100).toFixed(2)});            
-                });
+    // componentDidMount() {
+    //     console.log('TEST');
+    //     if(this.props.abi !=='') {
+    //         this.state.web3.eth.getAccounts().then((accounts) => {
+    //             var mainAccount = accounts[0];
+    //             this.state.web3.eth.getBalance(mainAccount).then((balance) => {
+    //                 this.setState({currency1Balance : this.state.web3.utils.fromWei(balance.toString(), 'ether')})
+    //                 this.setState({currency1BalanceRounded :(Math.round(this.state.web3.utils.fromWei(balance.toString(), 'ether')*100)/100).toFixed(2)});            
+    //             });
     
-                var currency2Contract = new this.state.web3.eth.Contract(this.props.abi, this.props.token);
+    //             var currency2Contract = new this.state.web3.eth.Contract(this.props.abi, this.props.token);
     
-                currency2Contract.methods.balanceOf(mainAccount).call().then((balance) => {
-                    this.setState({currency2Balance :this.state.web3.utils.fromWei(balance.toString(), 'ether')});
-                    this.setState({currency2BalanceRounded :(Math.round(this.state.web3.utils.fromWei(balance.toString(), 'ether')*100)/100).toFixed(2)});
-                    });
-                });
-        }        
-    }
+    //             currency2Contract.methods.balanceOf(mainAccount).call().then((balance) => {
+    //                 this.setState({currency2Balance :this.state.web3.utils.fromWei(balance.toString(), 'ether')});
+    //                 this.setState({currency2BalanceRounded :(Math.round(this.state.web3.utils.fromWei(balance.toString(), 'ether')*100)/100).toFixed(2)});
+    //                 });
+    //             });
+    //     }        
+    //}
 
     render() {
         return (<div>
@@ -46,16 +47,16 @@ class BalanceComponent extends React.Component {
             <div className="tile" id="currency1Balance">
                 <div className="tile is-parent">
                     <article className="tile is-child notification is-info">
-                        <p className="subtitle">Balance of {this.state.currency1}</p>
-                        <p className="title">{this.state.currency1BalanceRounded}</p>
+                        <p className="subtitle">Balance of {this.props.currency1}</p>
+                        <p className="title">{this.props.currency1BalanceRounded}</p>
                     </article>
                 </div>
             </div>
             <div className="tile" id="currency2Balance">
                 <div className="tile is-parent">
                     <article className="tile is-child notification is-danger">
-                        <p className="subtitle">Balance of {this.state.currency2}</p>
-                        <p className="title">{this.state.currency2BalanceRounded}</p>
+                        <p className="subtitle">Balance of {this.props.currency2}</p>
+                        <p className="title">{this.props.currency2BalanceRounded}</p>
                     </article>
                 </div>
             </div>

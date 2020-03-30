@@ -141,8 +141,13 @@ class Deposit extends React.Component {
     }
 
     deposit() {
-        if(!this.state.currency1EnoughBalance || !this.state.currency2EnoughBalance) {
-            alert('Inputed data isn\'t correct!');
+        if(!this.state.currency1EnoughBalance) {
+            alert('You didn\'t have enought amount of ' + this.props.currencyPair.currency1);
+            return;
+        }
+
+        if(!this.state.currency2EnoughBalance) {
+            alert('You didn\'t have enought amount of ' + this.props.currencyPair.currency2);
             return
         }
 
@@ -252,7 +257,7 @@ class Deposit extends React.Component {
 
     remove() {
         if(!this.state.pooledTokenEnoughBalance) {
-            alert('Inputed data isn\'t correct!');
+            alert('You can\'t retrieve this amount of pooled token!');
             return
         }
 
