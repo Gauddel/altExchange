@@ -8,12 +8,12 @@
     "@testing-library/user-event": "^7.1.2",
     "bulma": "^0.8.0",
     "bulma-extensions": "^6.2.7",
-    "node-sass": "^4.13.1",
+    "node-sass": "^9.0.0",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
-    "react-scripts": "3.3.1",
+    "react-scripts": "5.0.1",
     "recharts": "^1.8.5",
-    "web3": "^1.2.6"
+    "web3": "^4.0.2"
   },
   "scripts": {
     "css-build": "node-sass --omit-source-map-url ./src/sass/myStyles.scss ./src/index.css",
